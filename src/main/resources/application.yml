@@ -7,3 +7,8 @@ logging:
 spring:
   messages:
     basename: messages
+management:
+  endpoint:
+    web:
+      exposure:
+        include: "*"
