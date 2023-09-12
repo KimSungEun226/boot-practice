@@ -1,7 +1,7 @@
 package com.huibigo.restfulwebservice.user;
 
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -10,8 +10,8 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserController {
@@ -27,19 +27,17 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public Resource<User> retrieveUser(@PathVariable int id) {
+    public ResponseEntity<?> retrieveUser(@PathVariable int id) {
         User user = service.findOne(id);
         if(user == null) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
 
-        // HATEOAS
-        Resource<User> resource = new Resource<>(user);
-        ControllerLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        EntityModel entityModel = EntityModel.of(user);
 
-        resource.add(linkTo.withRel("all-users"));
-
-        return resource;
+        WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        entityModel.add(linkTo.withRel("all-users"));
+        return ResponseEntity.ok(entityModel);
     }
 
     @PostMapping("/users")
